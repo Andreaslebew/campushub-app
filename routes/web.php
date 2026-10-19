@@ -1,15 +1,20 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\KotaController;
-use App\Http\Controllers\KampusController;
-use App\Http\Controllers\SearchController;
-use App\Http\Controllers\PostController;
 
-Route::get('/', [HomeController::class, 'index']);
-Route::get('/kota', [KotaController::class, 'index']);       // Menangani filter & sorting via Request
-Route::get('/kampus', [KampusController::class, 'index']);   // Menangani filter & sorting via Request
-Route::get('/search', [SearchController::class, 'index']);   // Pencarian
-Route::get('/post/{id}', [PostController::class, 'show']);   // Detail postingan & komentar
-Route::get('/tentang', [HomeController::class, 'tentang']);
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+require __DIR__.'/auth.php';
