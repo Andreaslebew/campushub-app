@@ -1,11 +1,24 @@
 <?php
 
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\HomeController;
+use App\Http\Controllers\KampusController;
+use App\Http\Controllers\KotaController;
+use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
-use App\Http\Controllers\HomeController;
-
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/kota', [KotaController::class, 'index'])->name('kota');
+Route::get('/kampus', [KampusController::class, 'index'])->name('kampus');
+Route::get('/event', [EventController::class, 'index'])->name('event');
+Route::view('/tentang', 'tentang')->name('tentang');
+
+Route::get('/post/{id}', [PostController::class, 'show'])->whereNumber('id')->name('post.show');
+Route::post('/post/{id}/komentar', [PostController::class, 'komentar'])->whereNumber('id')->name('post.komentar');
+
+Route::get('/event/{id}', [EventController::class, 'show'])->whereNumber('id')->name('event.show');
+Route::post('/event/{id}/komentar', [EventController::class, 'komentar'])->whereNumber('id')->name('event.komentar');
 
 Route::get('/dashboard', function () {
     return view('dashboard');

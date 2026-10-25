@@ -1,6 +1,6 @@
 @php
     $inisial = mb_strtoupper(mb_substr($post['penulis'] ?? 'U', 0, 1));
-    $isKampus = ($post['scope'] ?? '') === 'Kampus' || ($post['scope'] ?? '') === 'kampus';
+    $isKampus = in_array(strtolower($post['scope'] ?? ''), ['kampus']);
 @endphp
 
 <article class="rounded-2xl border border-neutral-200 bg-white p-4 sm:p-5 transition hover:bg-neutral-50/60">
@@ -43,7 +43,6 @@
                 Prodi: {{ $post['prodi'] }}
             </span>
 
-            {{-- Suka --}}
             <button type="button" class="group flex items-center gap-1.5 text-sm text-neutral-500 hover:text-rose-600">
                 <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.49-2.02-4.5-4.5-4.5-1.74 0-3.25 1-4 2.46C12.75 4.75 11.24 3.75 9.5 3.75 7.02 3.75 5 5.76 5 8.25c0 4.5 7 11.25 7 11.25s7-6.75 7-11.25z" />
@@ -54,9 +53,9 @@
             <span class="text-sm text-neutral-500">{{ $post['komentar'] ?? 0 }} balasan</span>
         </div>
 
-        <button type="button"
+        <a href="{{ route('post.show', $post['id']) }}"
             class="rounded-full border border-neutral-300 px-4 py-1.5 text-sm font-medium text-neutral-900 transition hover:bg-neutral-900 hover:text-white">
             Komentar
-        </button>
+        </a>
     </div>
 </article>

@@ -1,3 +1,11 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+
+/* Beri tahu Tailwind di mana mencari kelas yang dipakai */
+@source "../views";
+@source "../js";
+
+/* Font sesuai wireframe (dimuat dari Bunny Fonts di layout) */
+@theme {
+    --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+}
