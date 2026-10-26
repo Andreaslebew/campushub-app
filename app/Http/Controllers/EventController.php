@@ -45,4 +45,19 @@ class EventController extends Controller
 
         return redirect()->route('event.show', $id)->with('sukses', 'Komentar berhasil dikirim.');
     }
+
+    public function suka(int $id)
+    {
+        abort_if(! collect(DummyData::events())->firstWhere('id', $id), 404);
+
+        $disukai = session('disukai_event', []);
+
+        $disukai = in_array($id, $disukai, true)
+            ? array_values(array_diff($disukai, [$id]))
+            : array_merge($disukai, [$id]);
+
+        session(['disukai_event' => $disukai]);
+
+        return back();
+    }
 }

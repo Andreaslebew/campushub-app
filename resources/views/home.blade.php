@@ -4,7 +4,12 @@
 <div class="space-y-4">
 
     <!-- Bar pencarian & filter -->
+    @php $urut = request('urut', 'teramai'); @endphp
+
     <form method="GET" action="{{ url()->current() }}" class="space-y-2">
+        {{-- Menjaga urutan tetap saat mencari atau mengganti prodi --}}
+        <input type="hidden" name="urut" value="{{ $urut }}">
+
         <label class="flex w-full items-center gap-2 rounded-full border border-neutral-300 bg-white px-4 py-2.5 focus-within:border-neutral-900">
             <svg class="h-4 w-4 shrink-0 text-neutral-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.2-5.2M16.5 10.5a6 6 0 11-12 0 6 6 0 0112 0z" />
@@ -23,19 +28,17 @@
                 @endforeach
             </select>
 
-            @php $urut = request('urut', 'teramai'); @endphp
-
-            <button type="submit" name="urut" value="teramai"
+            <a href="{{ request()->fullUrlWithQuery(['urut' => 'teramai']) }}"
                 class="shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition
                 {{ $urut === 'teramai' ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-300 bg-white text-neutral-900 hover:border-neutral-900' }}">
                 Teramai
-            </button>
+            </a>
 
-            <button type="submit" name="urut" value="terbaru"
+            <a href="{{ request()->fullUrlWithQuery(['urut' => 'terbaru']) }}"
                 class="shrink-0 rounded-full border px-4 py-2 text-sm font-medium transition
                 {{ $urut === 'terbaru' ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-300 bg-white text-neutral-900 hover:border-neutral-900' }}">
                 Terbaru
-            </button>
+            </a>
         </div>
     </form>
 

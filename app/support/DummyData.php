@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 class DummyData
 {
-    public static function posts(): array
+    public static function postsDasar(): array
     {
         return [
             [
@@ -56,6 +56,133 @@ class DummyData
         ];
     }
 
+    public static function komentar(int $id): array
+    {
+        $semua = [
+            1 => [
+                ['penulis' => 'Dimas_Frontend', 'isi' => 'Saya bisa ikut, sudah pernah pakai Vue dan Tailwind untuk tugas kelompok.', 'waktu' => '1 jam lalu'],
+                ['penulis' => 'Nadia_TI', 'isi' => 'Hackathonnya online atau offline? Lokasinya di mana ya?', 'waktu' => '45 menit lalu'],
+            ],
+            2 => [
+                ['penulis' => 'Fajar_Elektro', 'isi' => 'Coba cek toko elektronik di sekitar Jalan Soekarno Hatta, biasanya stok ESP32 lebih lengkap.', 'waktu' => '2 jam lalu'],
+            ],
+            3 => [
+                ['penulis' => 'Kevin_Manajemen', 'isi' => 'Dosennya tegas tapi jelas. Tugas dikumpulkan tepat waktu dan rapi, itu sudah cukup.', 'waktu' => '4 jam lalu'],
+            ],
+        ];
+
+        return $semua[$id] ?? [];
+    }
+
+    // Waktu upload dummy (dalam jam yang lalu)
+    private static function waktuDasar(): array
+    {
+        return [
+            'post' => [1 => 2, 2 => 3, 3 => 5, 4 => 24],
+            'event' => [1 => 48, 2 => 72, 3 => 96, 4 => 120],
+        ];
+    }
+
+    public static function waktuRelatif(int $ts): string
+    {
+        $selisih = max(0, time() - $ts);
+
+        if ($selisih < 60) {
+            return 'baru saja';
+        }
+        if ($selisih < 3600) {
+            return intdiv($selisih, 60).' menit lalu';
+        }
+        if ($selisih < 86400) {
+            return intdiv($selisih, 3600).' jam lalu';
+        }
+
+        return intdiv($selisih, 86400).' hari lalu';
+    }
+
+    public static function jumlahKomentar(string $tipe, int $id): int
+    {
+        $dasar = $tipe === 'post' ? self::komentar($id) : self::komentarEvent($id);
+        $sesi = session($tipe === 'post' ? "komentar.$id" : "komentar_event.$id", []);
+
+        return count($dasar) + count($sesi);
+    }
+
+    public static function posts(): array
+    {
+        $disukai = session('disukai', []);
+        $jamDasar = self::waktuDasar()['post'];
+
+        $semua = array_merge(self::postsDasar(), session('postingan_baru', []));
+
+        return array_map(function ($p) use ($disukai, $jamDasar) {
+            $p['dibuat'] ??= time() - ($jamDasar[$p['id']] ?? 0) * 3600;
+            $p['suka'] = ($p['suka'] ?? 0) + (in_array($p['id'], $disukai, true) ? 1 : 0);
+            $p['komentar'] = self::jumlahKomentar('post', $p['id']);
+            $p['waktu'] = self::waktuRelatif($p['dibuat']);
+
+            return $p;
+        }, $semua);
+    }
+
+    public static function events(): array
+    {
+        $disukai = session('disukai_event', []);
+        $jamDasar = self::waktuDasar()['event'];
+
+        return array_map(function ($e) use ($disukai, $jamDasar) {
+            $e['dibuat'] = time() - ($jamDasar[$e['id']] ?? 0) * 3600;
+            $e['suka'] = in_array($e['id'], $disukai, true) ? 1 : 0;
+            $e['komentar'] = self::jumlahKomentar('event', $e['id']);
+
+            return $e;
+        }, self::eventsDasar());
+    }
+
+    public static function feed(Request $request, ?string $scope = null): array
+    {
+        $items = [];
+
+        foreach (self::filterPosts(self::posts(), $request, $scope) as $p) {
+            $items[] = [
+                'tipe' => 'post',
+                'data' => $p,
+                'skor' => $p['suka'] + $p['komentar'],
+                'dibuat' => $p['dibuat'],
+            ];
+        }
+
+        // Event disembunyikan saat filter prodi dipilih, karena event tidak punya prodi
+        if (! $request->query('prodi')) {
+            $events = self::filterEvents(self::events(), $request);
+
+            if ($scope) {
+                $events = array_values(array_filter($events, fn ($e) => $e['scope'] === $scope));
+            }
+
+            foreach ($events as $e) {
+                $items[] = [
+                    'tipe' => 'event',
+                    'data' => $e,
+                    'skor' => $e['suka'] + $e['komentar'],
+                    'dibuat' => $e['dibuat'],
+                ];
+            }
+        }
+
+        $terbaru = $request->query('urut') === 'terbaru';
+
+        usort($items, function ($a, $b) use ($terbaru) {
+            if ($terbaru) {
+                return $b['dibuat'] <=> $a['dibuat'];
+            }
+
+            return [$b['skor'], $b['dibuat']] <=> [$a['skor'], $a['dibuat']];
+        });
+
+        return $items;
+    }
+
     public static function komentarEvent(int $id): array
     {
         $semua = [
@@ -74,7 +201,7 @@ class DummyData
         return $semua[$id] ?? [];
     }
 
-    public static function events(): array
+    public static function eventsDasar(): array
     {
         return [
             [
@@ -191,43 +318,5 @@ class DummyData
         return $hasil;
     }
 
-    public static function feed(Request $request, ?string $scope = null): array
-    {
-        $items = [];
-
-        foreach (self::filterPosts(self::posts(), $request, $scope) as $p) {
-            $items[] = [
-                'tipe' => 'post',
-                'data' => $p,
-                'komentar' => $p['komentar'],
-                'sortId' => $p['id'],
-            ];
-        }
-
-        // Event disembunyikan saat filter prodi dipilih, karena event tidak punya prodi
-        if (! $request->query('prodi')) {
-            $events = self::filterEvents(self::events(), $request);
-
-            if ($scope) {
-                $events = array_values(array_filter($events, fn ($e) => $e['scope'] === $scope));
-            }
-
-            foreach ($events as $e) {
-                $items[] = [
-                    'tipe' => 'event',
-                    'data' => $e,
-                    'komentar' => count(self::komentarEvent($e['id'])),
-                    'sortId' => $e['id'],
-                ];
-            }
-        }
-
-        $terbaru = $request->query('urut') === 'terbaru';
-
-        usort($items, fn ($a, $b) => $terbaru
-            ? $b['sortId'] <=> $a['sortId']
-            : $b['komentar'] <=> $a['komentar']);
-
-        return $items;
-    }
+    
 }
