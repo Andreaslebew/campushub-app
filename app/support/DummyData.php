@@ -30,6 +30,8 @@ class DummyData
                 'prodi' => 'Teknik Informatika',
                 'suka' => 0,
                 'komentar' => 5,
+                'lokasi' => 'https://www.google.com/maps/search/?api=1&query=Jl.+Soekarno+Hatta,+Kota+Malang',
+                'lokasi_nama' => 'Jl. Soekarno Hatta, Kota Malang',
             ],
             [
                 'id' => 3,
@@ -74,7 +76,7 @@ class DummyData
         return $semua[$id] ?? [];
     }
 
-    // Waktu upload dummy (dalam jam yang lalu)
+    /** Waktu upload dummy (dalam jam yang lalu) */
     private static function waktuDasar(): array
     {
         return [
@@ -112,10 +114,14 @@ class DummyData
     {
         $disukai = session('disukai', []);
         $jamDasar = self::waktuDasar()['post'];
+        $edits = session('postingan_edit', []);
 
         $semua = array_merge(self::postsDasar(), session('postingan_baru', []));
 
-        return array_map(function ($p) use ($disukai, $jamDasar) {
+        return array_map(function ($p) use ($disukai, $jamDasar, $edits) {
+            if (isset($edits[$p['id']])) {
+                $p = array_merge($p, $edits[$p['id']]);
+            }
             $p['dibuat'] ??= time() - ($jamDasar[$p['id']] ?? 0) * 3600;
             $p['suka'] = ($p['suka'] ?? 0) + (in_array($p['id'], $disukai, true) ? 1 : 0);
             $p['komentar'] = self::jumlahKomentar('post', $p['id']);
@@ -129,14 +135,20 @@ class DummyData
     {
         $disukai = session('disukai_event', []);
         $jamDasar = self::waktuDasar()['event'];
+        $edits = session('events_edit', []);
 
-        return array_map(function ($e) use ($disukai, $jamDasar) {
-            $e['dibuat'] = time() - ($jamDasar[$e['id']] ?? 0) * 3600;
-            $e['suka'] = in_array($e['id'], $disukai, true) ? 1 : 0;
+        $semua = array_merge(self::eventsDasar(), session('events_baru', []));
+
+        return array_map(function ($e) use ($disukai, $jamDasar, $edits) {
+            if (isset($edits[$e['id']])) {
+                $e = array_merge($e, $edits[$e['id']]);
+            }
+            $e['dibuat'] ??= time() - ($jamDasar[$e['id']] ?? 0) * 3600;
+            $e['suka'] = in_array($e['id'], $disukai, true) ? 1 : ($e['suka'] ?? 0);
             $e['komentar'] = self::jumlahKomentar('event', $e['id']);
 
             return $e;
-        }, self::eventsDasar());
+        }, $semua);
     }
 
     public static function feed(Request $request, ?string $scope = null): array
@@ -177,7 +189,11 @@ class DummyData
                 return $b['dibuat'] <=> $a['dibuat'];
             }
 
-            return [$b['skor'], $b['dibuat']] <=> [$a['skor'], $a['dibuat']];
+            if ($b['skor'] !== $a['skor']) {
+                return $b['skor'] <=> $a['skor'];
+            }
+
+            return $b['dibuat'] <=> $a['dibuat'];
         });
 
         return $items;
@@ -255,6 +271,57 @@ class DummyData
         ];
     }
 
+    /**
+     * @return array<int, array{id: int, tipe: string, pesan: string, waktu: string, dibaca: bool, post_id: int|null}>
+     */
+    public static function notifikasi(): array
+    {
+        $sudahDibaca = session('notifikasi_dibaca', []);
+
+        $daftar = [
+            [
+                'id' => 1,
+                'tipe' => 'suka',
+                'pesan' => 'Budi_Teknik menyukai postingan kamu.',
+                'waktu' => '5 menit lalu',
+                'dibaca' => false,
+                'post_id' => 1,
+            ],
+            [
+                'id' => 2,
+                'tipe' => 'balasan',
+                'pesan' => 'Dimas_Frontend membalas komentar kamu di postingan tentang hackathon.',
+                'waktu' => '20 menit lalu',
+                'dibaca' => false,
+                'post_id' => 1,
+            ],
+            [
+                'id' => 3,
+                'tipe' => 'suka',
+                'pesan' => 'Nadia_TI menyukai postingan kamu.',
+                'waktu' => '1 jam lalu',
+                'dibaca' => true,
+                'post_id' => 2,
+            ],
+            [
+                'id' => 4,
+                'tipe' => 'balasan',
+                'pesan' => 'Kevin_Manajemen membalas komentar kamu di thread Statistik Bisnis.',
+                'waktu' => '3 jam lalu',
+                'dibaca' => true,
+                'post_id' => 3,
+            ],
+        ];
+
+        return array_map(function ($item) use ($sudahDibaca) {
+            if (in_array($item['id'], $sudahDibaca, true)) {
+                $item['dibaca'] = true;
+            }
+
+            return $item;
+        }, $daftar);
+    }
+
     public static function daftarProdi(): array
     {
         return ['Teknik Informatika', 'Administrasi Bisnis', 'Akuntansi', 'Pendidikan Seni Rupa', 'Psikologi'];
@@ -279,13 +346,24 @@ class DummyData
                     return false;
                 }
             }
+
             return true;
         }));
 
         if ($urut === 'terbaru') {
-            usort($hasil, fn ($a, $b) => $b['id'] <=> $a['id']);
+            usort($hasil, fn ($a, $b) => ($b['dibuat'] ?? 0) <=> ($a['dibuat'] ?? 0));
         } else {
-            usort($hasil, fn ($a, $b) => $b['komentar'] <=> $a['komentar']);
+            // Default: 'teramai' diurutkan berdasarkan jumlah suka (like) dan komentar (balasan)
+            usort($hasil, function ($a, $b) {
+                $skorA = ($a['suka'] ?? 0) + ($a['komentar'] ?? 0);
+                $skorB = ($b['suka'] ?? 0) + ($b['komentar'] ?? 0);
+
+                if ($skorB !== $skorA) {
+                    return $skorB <=> $skorA;
+                }
+
+                return ($b['dibuat'] ?? 0) <=> ($a['dibuat'] ?? 0);
+            });
         }
 
         return $hasil;
@@ -310,6 +388,7 @@ class DummyData
                     return false;
                 }
             }
+
             return true;
         }));
 
@@ -317,6 +396,4 @@ class DummyData
 
         return $hasil;
     }
-
-    
 }

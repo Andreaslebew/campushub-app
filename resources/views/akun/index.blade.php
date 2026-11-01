@@ -68,14 +68,18 @@
 
     {{-- Daftar --}}
     <div class="space-y-3">
-        @forelse ($daftar as $p)
-            @include('komponen.kartu-post', ['post' => $p])
+        @forelse ($daftar as $item)
+            @if ($item['tipe'] === 'event')
+                @include('komponen.kartu-event', ['event' => $item['data'], 'bisaEdit' => ($tab === 'postingan')])
+            @else
+                @include('komponen.kartu-post', ['post' => $item['data'], 'bisaEdit' => ($tab === 'postingan')])
+            @endif
         @empty
             <div class="rounded-2xl border border-dashed border-neutral-300 bg-white p-8 text-center text-sm text-neutral-500">
                 @if ($tab === 'disukai')
                     Belum ada postingan yang kamu sukai.
                 @else
-                    Belum ada postingan. Buat postingan pertamamu lewat tombol + di bawah.
+                    Belum ada postingan atau event. Buat postingan pertamamu lewat tombol + di navigasi.
                 @endif
             </div>
         @endforelse

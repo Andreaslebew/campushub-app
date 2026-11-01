@@ -9,3 +9,406 @@
 @theme {
     --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
 }
+
+/* Base page background: slightly darker neutral for clear contrast with white cards, lines, and elements */
+body {
+    background-color: #eaeaea;
+}
+
+/* ==========================================================================
+   Reusable External Styles
+   ========================================================================== */
+
+/* State visibility helper */
+[x-cloak],
+.is-hidden {
+    display: none !important;
+}
+
+.is-shown {
+    display: block !important;
+}
+
+.is-flex-shown {
+    display: inline-flex !important;
+}
+
+/* Segmented Tab Switcher */
+.type-switcher {
+    display: flex;
+    border-radius: 0.75rem;
+    background-color: #f5f5f5;
+    padding: 0.25rem;
+    margin-bottom: 1.25rem;
+}
+
+.type-switcher-btn {
+    flex: 1;
+    border-radius: 0.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    text-align: center;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    transition: all 0.15s ease-in-out;
+}
+
+.type-switcher-btn.active {
+    background-color: #ffffff;
+    color: #171717;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.type-switcher-btn.inactive {
+    color: #737373;
+}
+
+.type-switcher-btn.inactive:hover {
+    color: #171717;
+}
+
+/* Attachment Panel (Lokasi & Pilihan) */
+.attachment-panel {
+    border-radius: 1rem;
+    border: 1px solid #e5e5e5;
+    background-color: #fafafa;
+    padding: 0.875rem;
+}
+
+/* Toolbar Icon Buttons */
+.toolbar-icon-btn {
+    display: flex;
+    height: 2.25rem;
+    width: 2.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    color: #737373;
+    transition: all 0.15s ease-in-out;
+}
+
+.toolbar-icon-btn:hover {
+    background-color: #f5f5f5;
+}
+
+.toolbar-icon-btn.btn-foto:hover {
+    color: #059669;
+}
+
+.toolbar-icon-btn.btn-video:hover {
+    color: #2563eb;
+}
+
+.toolbar-icon-btn.btn-lokasi:hover {
+    color: #e11d48;
+}
+
+/* Chip Lokasi Terpilih */
+.chip-lokasi {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    border-radius: 9999px;
+    border: 1px solid #a7f3d0;
+    background-color: #ecfdf5;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #065f46;
+}
+
+/* Media Preview Containers */
+.preview-media-box {
+    position: relative;
+    display: inline-block;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    border: 1px solid #e5e5e5;
+}
+
+.preview-media-delete-btn {
+    position: absolute;
+    top: 0.375rem;
+    right: 0.375rem;
+    display: flex;
+    height: 1.375rem;
+    width: 1.375rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background-color: rgba(23, 23, 23, 0.8);
+    font-size: 0.75rem;
+    color: #ffffff;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition: background-color 0.15s ease;
+}
+
+.preview-media-delete-btn:hover {
+    background-color: #171717;
+}
+
+/* ==========================================================================
+   Desktop Layout (≥ 1024px)
+   ========================================================================== */
+
+/* --- Bottom nav: hidden on desktop --- */
+.desktop-sidebar-container {
+    display: none;
+}
+
+.desktop-spacer {
+    display: none;
+}
+
+.sidebar-nav {
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    .navigasi-bawah {
+        display: none !important;
+    }
+
+    /* --- Desktop main wrapper (sidebar | content | spacer) --- */
+    .desktop-layout-wrapper {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: stretch;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* --- Desktop Sidebar Container: directly attached to posting column with white border, stays fixed/stationary on scroll --- */
+    .desktop-sidebar-container {
+        display: flex;
+        justify-content: flex-end;
+        width: 250px;
+        min-width: 250px;
+        flex-shrink: 0;
+        border-right: 2px solid #ffffff;
+        position: sticky;
+        top: var(--navbar-height, 6.8125rem);
+        height: calc(100vh - var(--navbar-height, 6.8125rem));
+        align-self: flex-start;
+        overflow-y: auto;
+        scrollbar-width: none;
+    }
+
+    .desktop-sidebar-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    /* --- Desktop Sidebar Navigation --- */
+    .sidebar-nav {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        padding: 1.5rem 0.75rem 1.5rem 0.5rem;
+        gap: 0.375rem;
+    }
+
+    .sidebar-nav-link {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.875rem 1.25rem;
+        border-radius: 9999px;
+        font-size: 1.0625rem;
+        font-weight: 600;
+        color: #525252;
+        transition: all 0.15s ease;
+        text-decoration: none;
+    }
+
+    .sidebar-nav-link:hover {
+        background-color: #ffffff;
+        color: #171717;
+    }
+
+    .sidebar-nav-link.active {
+        background-color: #ffffff;
+        color: #171717;
+        font-weight: 700;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+    }
+
+    .sidebar-nav-link svg {
+        width: 1.65rem;
+        height: 1.65rem;
+        flex-shrink: 0;
+    }
+
+    .sidebar-nav-badge {
+        margin-left: auto;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 1.35rem;
+        height: 1.35rem;
+        padding: 0 0.4rem;
+        border-radius: 9999px;
+        background-color: #f43f5e;
+        color: #ffffff;
+        font-size: 0.75rem;
+        font-weight: 700;
+        line-height: 1;
+    }
+
+    /* --- Desktop Content Area (centered) --- */
+    .desktop-content-area {
+        flex: 0 1 700px;
+        width: 100%;
+        max-width: 700px;
+        min-width: 0;
+        margin: 0;
+        padding: 1.5rem 1.5rem 2rem 1.5rem;
+    }
+
+    /* --- Desktop Spacer: matches sidebar width for mathematical centering --- */
+    .desktop-spacer {
+        display: block;
+        width: 250px;
+        min-width: 250px;
+        flex-shrink: 0;
+    }
+
+    /* --- Desktop Tab Bar: centered --- */
+    .tab-bar-wrapper {
+        justify-content: center;
+    }
+
+    .tab-bar-tabs {
+        flex: none;
+        justify-content: center;
+    }
+
+    .tab-bar-tabs a {
+        font-size: 1.05rem !important;
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+        height: 3.25rem !important;
+    }
+
+    /* Filter button on desktop */
+    #tombol-filter-navbar {
+        height: 2.5rem !important;
+        width: 2.5rem !important;
+    }
+    #tombol-filter-navbar svg {
+        height: 1.25rem !important;
+        width: 1.25rem !important;
+    }
+
+    #panel-filter-navbar {
+        display: flex;
+        justify-content: center;
+    }
+    #panel-filter-navbar.hidden {
+        display: none !important;
+    }
+    #panel-filter-navbar form {
+        max-width: 700px;
+        width: 100%;
+    }
+
+    /* --- Remove bottom padding on desktop --- */
+    .main-content {
+        padding-bottom: 2rem;
+    }
+
+    /* ======================================================================
+       Enlarged Typography & Elements for Desktop Readability
+       ====================================================================== */
+
+    /* Cards */
+    article[id^="post-"],
+    article[id^="event-"] {
+        padding: 1.5rem !important;
+        border-radius: 1.25rem !important;
+    }
+
+    /* Author info */
+    article[id^="post-"] h6,
+    article[id^="event-"] h6 {
+        font-size: 1.0625rem !important;
+    }
+
+    article[id^="post-"] .truncate.text-sm,
+    article[id^="event-"] .truncate.text-sm {
+        font-size: 0.9375rem !important;
+    }
+
+    /* Avatar */
+    article[id^="post-"] .h-11.w-11,
+    article[id^="event-"] .h-11.w-11 {
+        height: 3.25rem !important;
+        width: 3.25rem !important;
+        font-size: 1.0625rem !important;
+    }
+
+    /* Post body text */
+    article[id^="post-"] > p.whitespace-pre-line,
+    article[id^="event-"] > p.leading-relaxed {
+        font-size: 1.125rem !important;
+        line-height: 1.75 !important;
+    }
+
+    /* Event specifics */
+    article[id^="event-"] h3 {
+        font-size: 1.25rem !important;
+        line-height: 1.4 !important;
+    }
+
+    article[id^="event-"] .space-y-1 p {
+        font-size: 0.9375rem !important;
+    }
+
+    /* Meta items & action buttons */
+    article[id^="post-"] .text-sm,
+    article[id^="event-"] .text-sm {
+        font-size: 0.9375rem !important;
+    }
+
+    article[id^="post-"] svg.h-\[18px\],
+    article[id^="event-"] svg.h-\[18px\] {
+        height: 1.35rem !important;
+        width: 1.35rem !important;
+    }
+
+    article[id^="post-"] .rounded-full.border.px-4.py-1\.5,
+    article[id^="event-"] .rounded-full.border.px-4.py-1\.5 {
+        padding: 0.5rem 1.25rem !important;
+        font-size: 0.9375rem !important;
+    }
+
+    /* Badges */
+    article[id^="post-"] .rounded-full.border.px-3,
+    article[id^="event-"] .rounded-full.border.px-3 {
+        font-size: 0.8125rem !important;
+        padding: 0.35rem 0.875rem !important;
+    }
+
+    article[id^="post-"] .rounded-md.bg-neutral-100,
+    article[id^="event-"] .rounded-md.bg-neutral-100 {
+        font-size: 0.8125rem !important;
+        padding: 0.35rem 0.75rem !important;
+    }
+
+    /* Search input */
+    label:has(input[type="search"]) {
+        padding: 0.75rem 1.25rem !important;
+    }
+    input[type="search"] {
+        font-size: 1.05rem !important;
+    }
+
+    /* Notification items */
+    [id^="notif-"] {
+        padding: 1.125rem 1.25rem !important;
+    }
+    [id^="notif-"] p {
+        font-size: 1.05rem !important;
+    }
+}

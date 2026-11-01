@@ -24,35 +24,185 @@ class PostController extends Controller
         abort_if(! collect(DummyData::posts())->firstWhere('id', $id), 404);
 
         $data = $request->validate([
-            'isi' => 'required|string|max:500',
+            'isi' => 'nullable|string|max:500',
+            'foto' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:10240',
+            'video' => 'nullable|file|mimetypes:video/mp4,video/webm,video/quicktime,video/x-matroska|max:51200',
+            'lokasi' => 'nullable|string|max:500',
+            'lokasi_nama' => 'nullable|string|max:255',
         ]);
+
+        if (empty($data['isi']) && ! $request->hasFile('foto') && ! $request->hasFile('video') && empty($data['lokasi']) && empty($data['lokasi_nama'])) {
+            return back()->withErrors(['isi' => 'Tulis komentar atau sertakan foto/video/lokasi.'])->withInput();
+        }
+
+        $fotoPath = null;
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $nama = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+            $file->move(public_path('uploads/komentar'), $nama);
+            $fotoPath = '/uploads/komentar/'.$nama;
+        }
+
+        $videoPath = null;
+        if ($request->hasFile('video')) {
+            $file = $request->file('video');
+            $nama = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+            $file->move(public_path('uploads/komentar'), $nama);
+            $videoPath = '/uploads/komentar/'.$nama;
+        }
+
+        $lokasiUrl = null;
+        $lokasiNama = null;
+        $lokasiRaw = ! empty($data['lokasi']) ? trim($data['lokasi']) : (! empty($data['lokasi_nama']) ? trim($data['lokasi_nama']) : null);
+        if ($lokasiRaw) {
+            if (str_starts_with($lokasiRaw, 'http://') || str_starts_with($lokasiRaw, 'https://')) {
+                $lokasiUrl = $lokasiRaw;
+            } else {
+                $lokasiUrl = 'https://www.google.com/maps/search/?api=1&query='.urlencode($lokasiRaw);
+            }
+            $lokasiNama = ! empty($data['lokasi_nama']) ? trim($data['lokasi_nama']) : $lokasiRaw;
+        }
 
         $daftar = session("komentar.$id", []);
         $daftar[] = [
-            'penulis' => 'Anda',
-            'isi' => $data['isi'],
+            'penulis' => Auth::check() ? Auth::user()->name : 'Anda',
+            'isi' => $data['isi'] ?? '',
             'waktu' => 'baru saja',
+            'foto' => $fotoPath,
+            'video' => $videoPath,
+            'lokasi' => $lokasiUrl,
+            'lokasi_nama' => $lokasiNama,
         ];
         session(["komentar.$id" => $daftar]);
 
-        return redirect()->route('post.show', $id)->with('sukses', 'Balasan berhasil dikirim.');
+        $redirectParams = ['id' => $id];
+        if ($request->filled('from')) {
+            $redirectParams['from'] = $request->input('from');
+        }
+
+        return redirect()->route('post.show', $redirectParams)->with('sukses', 'Balasan berhasil dikirim.');
     }
 
     public function create()
     {
         return view('post.create', [
             'daftarProdi' => DummyData::daftarProdi(),
+            'daftarKategori' => array_values(array_unique(array_column(DummyData::events(), 'kategori'))),
         ]);
     }
 
     public function store(Request $request)
     {
+        $tipe = $request->input('tipe', 'post');
+
+        if ($tipe === 'event') {
+            $data = $request->validate([
+                'judul' => 'required|string|max:150',
+                'penyelenggara' => 'required|string|max:100',
+                'scope' => 'required|in:Kota,Kampus',
+                'kategori' => 'required|string|max:50',
+                'tanggal' => 'required|date',
+                'waktu' => 'required|string|max:100',
+                'biaya' => 'required|string|max:50',
+                'deskripsi' => 'required|string|max:1000',
+                'foto' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:10240',
+                'video' => 'nullable|file|mimetypes:video/mp4,video/webm,video/quicktime,video/x-matroska|max:51200',
+                'lokasi' => 'nullable|string|max:500',
+                'lokasi_nama' => 'nullable|string|max:255',
+            ]);
+
+            $fotoPath = null;
+            if ($request->hasFile('foto')) {
+                $file = $request->file('foto');
+                $nama = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+                $file->move(public_path('uploads/posts'), $nama);
+                $fotoPath = '/uploads/posts/'.$nama;
+            }
+
+            $videoPath = null;
+            if ($request->hasFile('video')) {
+                $file = $request->file('video');
+                $nama = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+                $file->move(public_path('uploads/posts'), $nama);
+                $videoPath = '/uploads/posts/'.$nama;
+            }
+
+            $lokasiUrl = null;
+            $lokasiNama = null;
+            $lokasiRaw = ! empty($data['lokasi']) ? trim($data['lokasi']) : (! empty($data['lokasi_nama']) ? trim($data['lokasi_nama']) : null);
+            if ($lokasiRaw) {
+                if (str_starts_with($lokasiRaw, 'http://') || str_starts_with($lokasiRaw, 'https://')) {
+                    $lokasiUrl = $lokasiRaw;
+                } else {
+                    $lokasiUrl = 'https://www.google.com/maps/search/?api=1&query='.urlencode($lokasiRaw);
+                }
+                $lokasiNama = ! empty($data['lokasi_nama']) ? trim($data['lokasi_nama']) : $lokasiRaw;
+            }
+
+            $baruEvent = session('events_baru', []);
+            $baruEvent[] = [
+                'id' => 5000 + count($baruEvent) + 1,
+                'judul' => $data['judul'],
+                'penyelenggara' => $data['penyelenggara'],
+                'penulis' => Auth::user()->name,
+                'kategori' => $data['kategori'],
+                'scope' => $data['scope'],
+                'tanggal' => $data['tanggal'],
+                'waktu' => $data['waktu'],
+                'lokasi' => $lokasiNama ?? 'Lokasi via Google Maps',
+                'lokasi_url' => $lokasiUrl,
+                'biaya' => $data['biaya'],
+                'deskripsi' => $data['deskripsi'],
+                'foto' => $fotoPath,
+                'video' => $videoPath,
+                'dibuat' => time(),
+                'suka' => 0,
+                'komentar' => 0,
+            ];
+            session(['events_baru' => $baruEvent]);
+
+            return redirect()->route('akun.index', ['tab' => 'postingan'])->with('sukses', 'Event berhasil dipublikasikan.');
+        }
+
+        // Postingan biasa
         $data = $request->validate([
             'kampus' => 'required|string|max:100',
             'scope' => 'required|in:Kota,Kampus',
             'prodi' => ['required', Rule::in(DummyData::daftarProdi())],
             'konten' => 'required|string|max:500',
+            'foto' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:10240',
+            'video' => 'nullable|file|mimetypes:video/mp4,video/webm,video/quicktime,video/x-matroska|max:51200',
+            'lokasi' => 'nullable|string|max:500',
+            'lokasi_nama' => 'nullable|string|max:255',
         ]);
+
+        $fotoPath = null;
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $nama = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+            $file->move(public_path('uploads/posts'), $nama);
+            $fotoPath = '/uploads/posts/'.$nama;
+        }
+
+        $videoPath = null;
+        if ($request->hasFile('video')) {
+            $file = $request->file('video');
+            $nama = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+            $file->move(public_path('uploads/posts'), $nama);
+            $videoPath = '/uploads/posts/'.$nama;
+        }
+
+        $lokasiUrl = null;
+        $lokasiNama = null;
+        $lokasiRaw = ! empty($data['lokasi']) ? trim($data['lokasi']) : (! empty($data['lokasi_nama']) ? trim($data['lokasi_nama']) : null);
+        if ($lokasiRaw) {
+            if (str_starts_with($lokasiRaw, 'http://') || str_starts_with($lokasiRaw, 'https://')) {
+                $lokasiUrl = $lokasiRaw;
+            } else {
+                $lokasiUrl = 'https://www.google.com/maps/search/?api=1&query='.urlencode($lokasiRaw);
+            }
+            $lokasiNama = ! empty($data['lokasi_nama']) ? trim($data['lokasi_nama']) : $lokasiRaw;
+        }
 
         $baru = session('postingan_baru', []);
 
@@ -67,6 +217,10 @@ class PostController extends Controller
             'prodi' => $data['prodi'],
             'suka' => 0,
             'komentar' => 0,
+            'foto' => $fotoPath,
+            'video' => $videoPath,
+            'lokasi' => $lokasiUrl,
+            'lokasi_nama' => $lokasiNama,
         ];
 
         session(['postingan_baru' => $baru]);
@@ -88,5 +242,79 @@ class PostController extends Controller
         session(['disukai' => $disukai]);
 
         return back();
+    }
+
+    public function edit(int $id)
+    {
+        $post = collect(DummyData::posts())->firstWhere('id', $id);
+        abort_if(! $post, 404);
+        abort_if(($post['penulis'] ?? '') !== Auth::user()->name, 403);
+
+        return view('post.edit', [
+            'post' => $post,
+            'daftarProdi' => DummyData::daftarProdi(),
+        ]);
+    }
+
+    public function update(Request $request, int $id)
+    {
+        $post = collect(DummyData::posts())->firstWhere('id', $id);
+        abort_if(! $post, 404);
+        abort_if(($post['penulis'] ?? '') !== Auth::user()->name, 403);
+
+        $data = $request->validate([
+            'kampus' => 'required|string|max:100',
+            'scope' => 'required|in:Kota,Kampus',
+            'prodi' => ['required', Rule::in(DummyData::daftarProdi())],
+            'konten' => 'required|string|max:500',
+            'foto' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:10240',
+            'video' => 'nullable|file|mimetypes:video/mp4,video/webm,video/quicktime,video/x-matroska|max:51200',
+            'lokasi' => 'nullable|string|max:500',
+            'lokasi_nama' => 'nullable|string|max:255',
+        ]);
+
+        $fotoPath = $post['foto'] ?? null;
+        if ($request->hasFile('foto')) {
+            $file = $request->file('foto');
+            $nama = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+            $file->move(public_path('uploads/posts'), $nama);
+            $fotoPath = '/uploads/posts/'.$nama;
+        }
+
+        $videoPath = $post['video'] ?? null;
+        if ($request->hasFile('video')) {
+            $file = $request->file('video');
+            $nama = time().'_'.uniqid().'.'.$file->getClientOriginalExtension();
+            $file->move(public_path('uploads/posts'), $nama);
+            $videoPath = '/uploads/posts/'.$nama;
+        }
+
+        $lokasiUrl = $post['lokasi'] ?? null;
+        $lokasiNama = $post['lokasi_nama'] ?? null;
+        $lokasiRaw = ! empty($data['lokasi']) ? trim($data['lokasi']) : (! empty($data['lokasi_nama']) ? trim($data['lokasi_nama']) : null);
+        if ($lokasiRaw) {
+            if (str_starts_with($lokasiRaw, 'http://') || str_starts_with($lokasiRaw, 'https://')) {
+                $lokasiUrl = $lokasiRaw;
+            } else {
+                $lokasiUrl = 'https://www.google.com/maps/search/?api=1&query='.urlencode($lokasiRaw);
+            }
+            $lokasiNama = ! empty($data['lokasi_nama']) ? trim($data['lokasi_nama']) : $lokasiRaw;
+        }
+
+        $edits = session('postingan_edit', []);
+        $edits[$id] = [
+            'kampus' => $data['kampus'],
+            'scope' => $data['scope'],
+            'prodi' => $data['prodi'],
+            'konten' => $data['konten'],
+            'foto' => $fotoPath,
+            'video' => $videoPath,
+            'lokasi' => $lokasiUrl,
+            'lokasi_nama' => $lokasiNama,
+        ];
+        session(['postingan_edit' => $edits]);
+
+        return redirect()->route('akun.index', ['tab' => 'postingan'])
+            ->with('sukses', 'Postingan berhasil diperbarui.');
     }
 }
