@@ -25,39 +25,18 @@
 
         {{-- ================= FORM POSTINGAN BIASA ================= --}}
         <div id="section-post" class="space-y-4">
-            <div class="space-y-1.5">
-                <label for="kampus" class="block text-xs sm:text-sm font-semibold text-neutral-900">Nama kampus</label>
-                <input id="kampus" name="kampus" type="text" value="{{ old('kampus') }}" maxlength="100"
-                    placeholder="Contoh: Universitas Brawijaya"
-                    class="block w-full rounded-xl border-neutral-300 px-4 py-2.5 text-xs sm:text-sm focus:border-neutral-900 focus:ring-0">
-                @error('kampus')
-                    <p class="text-xs text-rose-600">{{ $message }}</p>
-                @enderror
+            <div class="rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-xs sm:text-sm text-neutral-600">
+                Diposting sebagai <span class="font-semibold text-neutral-900">{{ auth()->user()->prodi ?? '-' }}</span>
+                · {{ auth()->user()->kampus ?? '-' }} · {{ auth()->user()->kota ?? '-' }}
             </div>
 
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div class="space-y-1.5">
-                    <label for="scope-post" class="block text-xs sm:text-sm font-semibold text-neutral-900">Forum</label>
-                    <select id="scope-post" name="scope"
-                        class="block w-full rounded-xl border-neutral-300 px-4 py-2.5 text-xs sm:text-sm focus:border-neutral-900 focus:ring-0">
-                        <option value="Kota" @selected(old('scope') === 'Kota')>Forum Kota</option>
-                        <option value="Kampus" @selected(old('scope') === 'Kampus')>Forum Kampus</option>
-                    </select>
-                </div>
-
-                <div class="space-y-1.5">
-                    <label for="prodi" class="block text-xs sm:text-sm font-semibold text-neutral-900">Prodi</label>
-                    <select id="prodi" name="prodi"
-                        class="block w-full rounded-xl border-neutral-300 px-4 py-2.5 text-xs sm:text-sm focus:border-neutral-900 focus:ring-0">
-                        <option value="">Pilih prodi</option>
-                        @foreach ($daftarProdi as $prodi)
-                            <option value="{{ $prodi }}" @selected(old('prodi') === $prodi)>{{ $prodi }}</option>
-                        @endforeach
-                    </select>
-                    @error('prodi')
-                        <p class="text-xs text-rose-600">{{ $message }}</p>
-                    @enderror
-                </div>
+            <div class="space-y-1.5">
+                <label for="scope-post" class="block text-xs sm:text-sm font-semibold text-neutral-900">Forum</label>
+                <select id="scope-post" name="scope"
+                    class="block w-full rounded-xl border-neutral-300 px-4 py-2.5 text-xs sm:text-sm focus:border-neutral-900 focus:ring-0">
+                    <option value="Kota" @selected(old('scope') === 'Kota')>Forum Kota</option>
+                    <option value="Kampus" @selected(old('scope') === 'Kampus')>Forum Kampus</option>
+                </select>
             </div>
 
             <div class="space-y-1.5">

@@ -24,7 +24,7 @@
                     ['label' => 'Forum Kampus', 'url' => '/kampus', 'aktif' => request()->is('kampus*')],
                     ['label' => 'Event', 'url' => '/event', 'aktif' => request()->is('event*')],
                 ];
-                $sembunyikanTab = request()->is('buat*', 'akun*', 'post/*', 'event/*', 'cari*', 'notifikasi*');
+                $sembunyikanTab = request()->is('buat*', 'akun*', 'pengaturan*', 'post/*', 'event/*', 'cari*', 'notifikasi*');
             @endphp
 
             <div class="mx-auto max-w-6xl">

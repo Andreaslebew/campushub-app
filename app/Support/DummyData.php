@@ -123,6 +123,7 @@ class DummyData
                 $p = array_merge($p, $edits[$p['id']]);
             }
             $p['dibuat'] ??= time() - ($jamDasar[$p['id']] ?? 0) * 3600;
+            $p['kota'] ??= 'Malang';
             $p['suka'] = ($p['suka'] ?? 0) + (in_array($p['id'], $disukai, true) ? 1 : 0);
             $p['komentar'] = self::jumlahKomentar('post', $p['id']);
             $p['waktu'] = self::waktuRelatif($p['dibuat']);
@@ -144,6 +145,7 @@ class DummyData
                 $e = array_merge($e, $edits[$e['id']]);
             }
             $e['dibuat'] ??= time() - ($jamDasar[$e['id']] ?? 0) * 3600;
+            $e['kota'] ??= 'Malang';
             $e['suka'] = in_array($e['id'], $disukai, true) ? 1 : ($e['suka'] ?? 0);
             $e['komentar'] = self::jumlahKomentar('event', $e['id']);
 
@@ -151,7 +153,7 @@ class DummyData
         }, $semua);
     }
 
-    public static function feed(Request $request, ?string $scope = null): array
+        public static function feed(Request $request, ?string $scope = null): array
     {
         $items = [];
 
@@ -164,9 +166,12 @@ class DummyData
             ];
         }
 
-        // Event disembunyikan saat filter prodi dipilih, karena event tidak punya prodi
-        if (! $request->query('prodi')) {
-            $events = self::filterEvents(self::events(), $request);
+        // Event disembunyikan saat filter "prodi saya" aktif, karena event tidak punya prodi
+        if (! $request->boolean('hanya_prodi')) {
+            $events = array_values(array_filter(
+                self::filterEvents(self::events(), $request),
+                fn ($e) => self::sesuaiForum($e, $scope)
+            ));
 
             if ($scope) {
                 $events = array_values(array_filter($events, fn ($e) => $e['scope'] === $scope));
@@ -199,6 +204,27 @@ class DummyData
         return $items;
     }
 
+    /**
+     * Cek apakah postingan atau event berada di kota (forum kota) atau kampus (forum kampus)
+     * yang sama dengan pengguna yang sedang login. Tamu dan pengguna tanpa data tersebut tidak difilter.
+     *
+     * @param  array<string, mixed>  $item
+     */
+    public static function sesuaiForum(array $item, ?string $scope): bool
+    {
+        $pengguna = auth()->user();
+
+        if (! $scope || ! $pengguna) {
+            return true;
+        }
+
+        if ($scope === 'Kota') {
+            return ! $pengguna->kota || ($item['kota'] ?? null) === $pengguna->kota;
+        }
+
+        return ! $pengguna->kampus || ($item['kampus'] ?? null) === $pengguna->kampus;
+    }
+
     public static function komentarEvent(int $id): array
     {
         $semua = [
@@ -224,6 +250,7 @@ class DummyData
                 'id' => 1,
                 'judul' => 'Seminar Nasional Kecerdasan Buatan',
                 'penyelenggara' => 'HMIF Universitas Brawijaya',
+                'kampus' => 'Universitas Brawijaya',
                 'kategori' => 'Seminar',
                 'scope' => 'Kampus',
                 'tanggal' => '2026-11-05',
@@ -236,6 +263,7 @@ class DummyData
                 'id' => 2,
                 'judul' => 'Lomba Karya Tulis Ilmiah Nasional',
                 'penyelenggara' => 'UIN Maulana Malik Ibrahim',
+                'kampus' => 'UIN Maulana Malik Ibrahim',
                 'kategori' => 'Lomba',
                 'scope' => 'Kota',
                 'tanggal' => '2026-11-12',
@@ -248,6 +276,7 @@ class DummyData
                 'id' => 3,
                 'judul' => 'Workshop Fotografi Dasar',
                 'penyelenggara' => 'UKM Fotografi Universitas Negeri Malang',
+                'kampus' => 'Universitas Negeri Malang',
                 'kategori' => 'Workshop',
                 'scope' => 'Kampus',
                 'tanggal' => '2026-11-20',
@@ -255,18 +284,6 @@ class DummyData
                 'lokasi' => 'Aula FIK UM',
                 'biaya' => 'Rp 25.000',
                 'deskripsi' => 'Pengenalan komposisi, eksposur, dan teknik dasar fotografi. Kamera dipinjamkan untuk peserta pemula.',
-            ],
-            [
-                'id' => 4,
-                'judul' => 'Bazar Kewirausahaan Mahasiswa',
-                'penyelenggara' => 'Komunitas Wirausaha Malang',
-                'kategori' => 'Bazar',
-                'scope' => 'Kota',
-                'tanggal' => '2026-12-01',
-                'waktu' => '10.00 - 21.00 WIB',
-                'lokasi' => 'Alun-alun Malang',
-                'biaya' => 'Gratis',
-                'deskripsi' => 'Bazar produk karya mahasiswa dengan talkshow singkat tentang memulai usaha sejak kuliah.',
             ],
         ];
     }
@@ -327,17 +344,35 @@ class DummyData
         return ['Teknik Informatika', 'Administrasi Bisnis', 'Akuntansi', 'Pendidikan Seni Rupa', 'Psikologi'];
     }
 
+    public static function daftarKota(): array
+    {
+        return ['Malang', 'Surabaya', 'Jakarta', 'Bandung', 'Yogyakarta', 'Semarang'];
+    }
+
+    public static function daftarKampus(): array
+    {
+        return [
+            'Universitas Brawijaya',
+            'Universitas Bhinneka Nusantara',
+            'Universitas Negeri Malang',
+            'UIN Maulana Malik Ibrahim',
+        ];
+    }
+
     public static function filterPosts(array $posts, Request $request, ?string $scope = null): array
     {
         $q = strtolower(trim((string) $request->query('q', '')));
-        $prodi = $request->query('prodi');
+        $prodiSaya = $request->boolean('hanya_prodi') ? auth()->user()?->prodi : null;
         $urut = $request->query('urut', 'teramai');
 
-        $hasil = array_values(array_filter($posts, function ($p) use ($q, $prodi, $scope) {
+        $hasil = array_values(array_filter($posts, function ($p) use ($q, $prodiSaya, $scope) {
             if ($scope && $p['scope'] !== $scope) {
                 return false;
             }
-            if ($prodi && $p['prodi'] !== $prodi) {
+            if (! self::sesuaiForum($p, $scope)) {
+                return false;
+            }
+            if ($prodiSaya && $p['prodi'] !== $prodiSaya) {
                 return false;
             }
             if ($q !== '') {

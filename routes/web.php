@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KampusController;
 use App\Http\Controllers\KotaController;
 use App\Http\Controllers\NotifikasiController;
+use App\Http\Controllers\PengaturanController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
@@ -29,6 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/buat', [PostController::class, 'store'])->name('post.store');
     Route::post('/post/{id}/suka', [PostController::class, 'suka'])->whereNumber('id')->name('post.suka');
     Route::get('/akun', [AkunController::class, 'index'])->name('akun.index');
+    Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan.index');
     Route::post('/event/{id}/suka', [EventController::class, 'suka'])->whereNumber('id')->name('event.suka');
     Route::get('/post/{id}/edit', [PostController::class, 'edit'])->whereNumber('id')->name('post.edit');
     Route::put('/post/{id}', [PostController::class, 'update'])->whereNumber('id')->name('post.update');

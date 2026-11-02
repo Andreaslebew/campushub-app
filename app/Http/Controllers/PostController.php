@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Support\DummyData;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 
 class PostController extends Controller
 {
@@ -145,6 +144,8 @@ class PostController extends Controller
                 'judul' => $data['judul'],
                 'penyelenggara' => $data['penyelenggara'],
                 'penulis' => Auth::user()->name,
+                'kampus' => Auth::user()->kampus,
+                'kota' => Auth::user()->kota,
                 'kategori' => $data['kategori'],
                 'scope' => $data['scope'],
                 'tanggal' => $data['tanggal'],
@@ -166,9 +167,7 @@ class PostController extends Controller
 
         // Postingan biasa
         $data = $request->validate([
-            'kampus' => 'required|string|max:100',
             'scope' => 'required|in:Kota,Kampus',
-            'prodi' => ['required', Rule::in(DummyData::daftarProdi())],
             'konten' => 'required|string|max:500',
             'foto' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:10240',
             'video' => 'nullable|file|mimetypes:video/mp4,video/webm,video/quicktime,video/x-matroska|max:51200',
@@ -210,11 +209,12 @@ class PostController extends Controller
             'id' => 1000 + count($baru) + 1,
             'dibuat' => time(),
             'penulis' => Auth::user()->name,
-            'kampus' => $data['kampus'],
+            'kampus' => Auth::user()->kampus,
+            'kota' => Auth::user()->kota,
             'scope' => $data['scope'],
             'waktu' => 'baru saja',
             'konten' => $data['konten'],
-            'prodi' => $data['prodi'],
+            'prodi' => Auth::user()->prodi,
             'suka' => 0,
             'komentar' => 0,
             'foto' => $fotoPath,
@@ -263,9 +263,7 @@ class PostController extends Controller
         abort_if(($post['penulis'] ?? '') !== Auth::user()->name, 403);
 
         $data = $request->validate([
-            'kampus' => 'required|string|max:100',
             'scope' => 'required|in:Kota,Kampus',
-            'prodi' => ['required', Rule::in(DummyData::daftarProdi())],
             'konten' => 'required|string|max:500',
             'foto' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:10240',
             'video' => 'nullable|file|mimetypes:video/mp4,video/webm,video/quicktime,video/x-matroska|max:51200',
@@ -303,9 +301,10 @@ class PostController extends Controller
 
         $edits = session('postingan_edit', []);
         $edits[$id] = [
-            'kampus' => $data['kampus'],
+            'kampus' => Auth::user()->kampus,
+            'kota' => Auth::user()->kota,
             'scope' => $data['scope'],
-            'prodi' => $data['prodi'],
+            'prodi' => Auth::user()->prodi,
             'konten' => $data['konten'],
             'foto' => $fotoPath,
             'video' => $videoPath,

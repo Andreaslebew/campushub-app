@@ -10,8 +10,20 @@
     @endif
 
     {{-- Kartu profil --}}
-    <div class="rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6">
-        <div class="flex items-center gap-4">
+    {{-- Kartu profil --}}
+    <div class="relative rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6">
+        {{-- Tombol pengaturan (pojok kanan atas) --}}
+        <a href="{{ route('pengaturan.index') }}"
+            aria-label="Pengaturan"
+            title="Pengaturan"
+            class="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full border border-neutral-300 text-neutral-600 transition hover:border-neutral-900 hover:text-neutral-900">
+            <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <circle cx="12" cy="12" r="3" />
+            </svg>
+        </a>
+
+        <div class="flex items-center gap-4 pr-12">
             <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-neutral-200 text-xl font-bold text-neutral-600">
                 {{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}
             </div>
@@ -19,6 +31,12 @@
             <div class="min-w-0 flex-1">
                 <h1 class="truncate text-lg font-bold text-neutral-900">{{ $user->name }}</h1>
                 <p class="truncate text-sm text-neutral-500">{{ $user->email }}</p>
+                <p class="mt-0.5 truncate text-xs text-neutral-500">
+                    {{ $user->nim ?? '-' }} · {{ $user->prodi ?? '-' }}
+                </p>
+                <p class="truncate text-xs text-neutral-500">
+                    {{ $user->kampus ?? '-' }} · {{ $user->kota ?? '-' }}
+                </p>
             </div>
         </div>
 

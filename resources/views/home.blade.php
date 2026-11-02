@@ -1,17 +1,23 @@
 @extends('layouts.app')
 
-@php $urut = request('urut', 'teramai'); @endphp
+@php
+    $urut = request('urut', 'teramai');
+    $hanyaProdi = request()->boolean('hanya_prodi');
+    $prodiSaya = auth()->user()?->prodi;
+    $kotaSaya = auth()->user()?->kota;
+    $kampusSaya = auth()->user()?->kampus;
+@endphp
 
 {{-- Indikator filter aktif (titik di tombol slider) --}}
 @section('filter-aktif-indikator')
-    @if (request('prodi') || request('urut') === 'terbaru')
+    @if ($hanyaProdi || $urut === 'terbaru')
         <span class="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-neutral-900"></span>
     @endif
 @endsection
 
 {{-- Konten panel filter di navbar --}}
 @section('filter-panel')
-    <form method="GET" action="{{ url()->current() }}" class="space-y-3">
+    <div class="space-y-3">
 
         {{-- Urutan --}}
         <div class="flex items-center gap-2">
@@ -28,25 +34,31 @@
             </a>
         </div>
 
-        {{-- Filter Prodi --}}
-        <div class="flex items-center gap-2">
-            <span class="shrink-0 text-xs font-semibold text-neutral-500">Prodi</span>
-            <select name="prodi" onchange="this.form.submit()"
-                class="min-w-0 flex-1 rounded-full border border-neutral-300 bg-white px-4 py-1.5 text-sm text-neutral-900 focus:border-neutral-900 focus:ring-0">
-                <option value="">Semua Prodi</option>
-                @foreach ($daftarProdi ?? [] as $prodi)
-                    <option value="{{ $prodi }}" @selected(request('prodi') === $prodi)>{{ $prodi }}</option>
-                @endforeach
-            </select>
-            <input type="hidden" name="urut" value="{{ $urut }}">
-        </div>
+        {{-- Filter prodi otomatis: tidak perlu memilih, cukup aktifkan --}}
+        @if ($prodiSaya)
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="shrink-0 text-xs font-semibold text-neutral-500">Prodi</span>
+                <a href="{{ request()->fullUrlWithQuery(['hanya_prodi' => $hanyaProdi ? null : 1]) }}"
+                    class="rounded-full border px-4 py-1.5 text-sm font-medium transition
+                    {{ $hanyaProdi ? 'border-neutral-900 bg-neutral-900 text-white' : 'border-neutral-300 bg-white text-neutral-700 hover:border-neutral-900' }}">
+                    {{ $hanyaProdi ? 'Hanya ' : '' }}{{ $prodiSaya }}
+                </a>
+            </div>
+        @endif
 
-        @if (request('prodi') || request('urut') === 'terbaru')
-            <a href="{{ url()->current() }}" class="inline-block text-xs text-neutral-400 hover:text-neutral-700 underline">
+        {{-- Info lingkup forum pengguna --}}
+        @if (request()->is('kota*') && $kotaSaya)
+            <p class="text-xs text-neutral-500">Menampilkan postingan dari kota <span class="font-semibold text-neutral-700">{{ $kotaSaya }}</span>.</p>
+        @elseif (request()->is('kampus*') && $kampusSaya)
+            <p class="text-xs text-neutral-500">Menampilkan postingan dari <span class="font-semibold text-neutral-700">{{ $kampusSaya }}</span>.</p>
+        @endif
+
+        @if ($hanyaProdi || $urut === 'terbaru')
+            <a href="{{ url()->current() }}" class="inline-block text-xs text-neutral-400 underline hover:text-neutral-700">
                 Reset filter
             </a>
         @endif
-    </form>
+    </div>
 @endsection
 
 @section('content')
