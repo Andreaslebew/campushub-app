@@ -20,12 +20,7 @@
 
             <div class="space-y-1.5">
                 <x-input-label for="prodi" value="Program studi" />
-                <select id="prodi" name="prodi" required class="block w-full rounded-xl border-neutral-300 bg-white px-4 py-2.5 text-xs sm:text-sm text-neutral-900 focus:border-neutral-900 focus:ring-0">
-                    <option value="">Pilih prodi</option>
-                    @foreach ($daftarProdi as $prodi)
-                        <option value="{{ $prodi }}" @selected(old('prodi') === $prodi)>{{ $prodi }}</option>
-                    @endforeach
-                </select>
+                <x-combo-box name="prodi" :opsi="$daftarProdi" :nilai="old('prodi', '')" placeholder="Ketik untuk mencari prodi" />
                 <x-input-error :messages="$errors->get('prodi')" />
             </div>
         </div>
@@ -33,23 +28,13 @@
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div class="space-y-1.5">
                 <x-input-label for="kota" value="Kota" />
-                <select id="kota" name="kota" required class="block w-full rounded-xl border-neutral-300 bg-white px-4 py-2.5 text-xs sm:text-sm text-neutral-900 focus:border-neutral-900 focus:ring-0">
-                    <option value="">Pilih kota</option>
-                    @foreach ($daftarKota as $kota)
-                        <option value="{{ $kota }}" @selected(old('kota') === $kota)>{{ $kota }}</option>
-                    @endforeach
-                </select>
+                <x-combo-box name="kota" :opsi="$daftarKota" :nilai="old('kota', '')" placeholder="Ketik untuk mencari kota" />
                 <x-input-error :messages="$errors->get('kota')" />
             </div>
 
             <div class="space-y-1.5">
                 <x-input-label for="kampus" value="Kampus" />
-                <select id="kampus" name="kampus" required class="block w-full rounded-xl border-neutral-300 bg-white px-4 py-2.5 text-xs sm:text-sm text-neutral-900 focus:border-neutral-900 focus:ring-0">
-                    <option value="">Pilih kampus</option>
-                    @foreach ($daftarKampus as $kampus)
-                        <option value="{{ $kampus }}" @selected(old('kampus') === $kampus)>{{ $kampus }}</option>
-                    @endforeach
-                </select>
+                <x-combo-box name="kampus" :peta="$kampusPerKota" induk="kota" :nilai-induk="old('kota', '')" :nilai="old('kampus', '')" placeholder="Pilih kota dulu" />
                 <x-input-error :messages="$errors->get('kampus')" />
             </div>
         </div>
@@ -71,7 +56,7 @@
             <x-password-input id="password_confirmation" name="password_confirmation" autocomplete="new-password" required />
             <x-input-error :messages="$errors->get('password_confirmation')" />
         </div>
-        
+
         <div class="pt-2">
             <x-primary-button class="w-full">Daftar</x-primary-button>
         </div>

@@ -60,3 +60,16 @@ test('registration rejects a nim that is already used', function () {
 
     $response->assertSessionHasErrors('nim');
 });
+
+test('kampus must belong to the selected kota', function () {
+    $this->post('/register', [
+        'name' => 'Test User',
+        'nim' => '2026000003',
+        'prodi' => 'Informatika',
+        'kota' => 'Surabaya',
+        'kampus' => 'Universitas Brawijaya',
+        'email' => 'salahkota@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ])->assertSessionHasErrors('kampus');
+});

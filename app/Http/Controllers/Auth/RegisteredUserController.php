@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Support\DummyData;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,7 +11,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
-use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
@@ -23,25 +21,26 @@ class RegisteredUserController extends Controller
     public function create(): View
     {
         return view('auth.register', [
-            'daftarProdi' => DummyData::daftarProdi(),
-            'daftarKota' => DummyData::daftarKota(),
-            'daftarKampus' => DummyData::daftarKampus(),
+            'daftarKota' => array_keys(config('akademik.kota')),
+            'kampusPerKota' => config('akademik.kota'),
+            'daftarProdi' => config('akademik.prodi'),
         ]);
     }
 
     /**
      * Handle an incoming registration request.
-     *
-     * @throws ValidationException
      */
     public function store(Request $request): RedirectResponse
     {
+        $kotaTerpilih = (string) $request->input('kota', '');
+        $kampusDiKotaTerpilih = config('akademik.kota')[$kotaTerpilih] ?? [];
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'nim' => ['required', 'string', 'max:20', 'unique:'.User::class.',nim'],
-            'prodi' => ['required', 'string', Rule::in(DummyData::daftarProdi())],
-            'kota' => ['required', 'string', Rule::in(DummyData::daftarKota())],
-            'kampus' => ['required', 'string', Rule::in(DummyData::daftarKampus())],
+            'prodi' => ['required', 'string', Rule::in(config('akademik.prodi'))],
+            'kota' => ['required', 'string', Rule::in(array_keys(config('akademik.kota')))],
+            'kampus' => ['required', 'string', Rule::in($kampusDiKotaTerpilih)],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);

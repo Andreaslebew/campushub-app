@@ -25,7 +25,7 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
+            'name' => fake('id_ID')->name(),
             'email' => fake()->unique()->safeEmail(),
             'nim' => fake()->unique()->numerify('2026########'),
             'prodi' => 'Teknik Informatika',
@@ -35,6 +35,22 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
         ];
+    }
+
+    /**
+     * Mahasiswa dari kampus tertentu. Kota diambil otomatis dari config agar selalu cocok.
+     */
+    public function kampus(string $kampus): static
+    {
+        $kota = collect(config('akademik.kota'))
+            ->search(fn (array $daftarKampus) => in_array($kampus, $daftarKampus, true))
+            ?? throw new \InvalidArgumentException("Kampus tidak ditemukan di config/akademik.php: {$kampus}");
+
+        return $this->state(fn () => [
+            'kampus' => $kampus,
+            'kota' => $kota,
+            'prodi' => fake()->randomElement(config('akademik.prodi')),
+        ]);
     }
 
     /**

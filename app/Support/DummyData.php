@@ -344,24 +344,19 @@ class DummyData
 
     public static function daftarProdi(): array
     {
-        return ['Teknik Informatika', 'Administrasi Bisnis', 'Akuntansi', 'Pendidikan Seni Rupa', 'Psikologi'];
+        return config('akademik.prodi');
     }
 
     public static function daftarKota(): array
     {
-        return ['Malang', 'Surabaya', 'Jakarta', 'Bandung', 'Yogyakarta', 'Semarang'];
+        return array_keys(config('akademik.kota'));
     }
 
     public static function daftarKampus(): array
     {
-        return [
-            'Universitas Brawijaya',
-            'Universitas Bhinneka Nusantara',
-            'Universitas Negeri Malang',
-            'UIN Maulana Malik Ibrahim',
-        ];
+        return array_values(array_unique(array_merge(...array_values(config('akademik.kota')))));
     }
-
+    
     public static function filterPosts(array $posts, Request $request, ?string $scope = null): array
     {
         $q = strtolower(trim((string) $request->query('q', '')));
