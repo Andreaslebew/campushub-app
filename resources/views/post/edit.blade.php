@@ -52,3 +52,4 @@
                 <div class="space-y-1.5">
                     <span class="block text-xs font-semibold text-neutral-700">Video saat ini:</span>
                     <div class="preview-media-box">
+            @endif

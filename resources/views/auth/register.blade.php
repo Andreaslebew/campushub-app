@@ -62,16 +62,16 @@
 
         <div class="space-y-1.5">
             <x-input-label for="password" value="Kata sandi" />
-            <x-text-input id="password" type="password" name="password" required autocomplete="new-password" />
+            <x-password-input id="password" name="password" autocomplete="new-password" required />
             <x-input-error :messages="$errors->get('password')" />
         </div>
 
         <div class="space-y-1.5">
             <x-input-label for="password_confirmation" value="Konfirmasi kata sandi" />
-            <x-text-input id="password_confirmation" type="password" name="password_confirmation" required autocomplete="new-password" />
+            <x-password-input id="password_confirmation" name="password_confirmation" autocomplete="new-password" required />
             <x-input-error :messages="$errors->get('password_confirmation')" />
         </div>
-
+        
         <div class="pt-2">
             <x-primary-button class="w-full">Daftar</x-primary-button>
         </div>

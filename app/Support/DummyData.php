@@ -112,26 +112,29 @@ class DummyData
 
     public static function posts(): array
     {
-        $disukai = session('disukai', []);
-        $jamDasar = self::waktuDasar()['post'];
-        $edits = session('postingan_edit', []);
-
-        $semua = array_merge(self::postsDasar(), session('postingan_baru', []));
-
-        return array_map(function ($p) use ($disukai, $jamDasar, $edits) {
-            if (isset($edits[$p['id']])) {
-                $p = array_merge($p, $edits[$p['id']]);
-            }
-            $p['dibuat'] ??= time() - ($jamDasar[$p['id']] ?? 0) * 3600;
-            $p['kota'] ??= 'Malang';
-            $p['suka'] = ($p['suka'] ?? 0) + (in_array($p['id'], $disukai, true) ? 1 : 0);
-            $p['komentar'] = self::jumlahKomentar('post', $p['id']);
-            $p['waktu'] = self::waktuRelatif($p['dibuat']);
-
-            return $p;
-        }, $semua);
+        return \App\Models\Post::query()
+            ->latest()
+            ->get()
+            ->map(fn ($p) => [
+                'id' => $p->id,
+                'penulis' => $p->penulis,
+                'kampus' => $p->kampus,
+                'kota' => $p->kota,
+                'prodi' => $p->prodi,
+                'scope' => $p->scope,
+                'konten' => $p->konten,
+                'foto' => $p->foto,
+                'video' => $p->video,
+                'lokasi' => $p->lokasi,
+                'lokasi_nama' => $p->lokasi_nama,
+                'suka' => $p->suka,
+                'komentar' => $p->komentar,
+                'waktu' => $p->created_at->diffForHumans(),
+                'dibuat' => $p->created_at->timestamp,
+            ])
+            ->all();
     }
-
+    
     public static function events(): array
     {
         $disukai = session('disukai_event', []);

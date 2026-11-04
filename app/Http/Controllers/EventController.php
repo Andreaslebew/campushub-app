@@ -9,6 +9,11 @@ class EventController extends Controller
 {
     public function index(Request $request)
     {
+        // Filter scope (Kota & Kampus) hanya untuk pengguna yang sudah login
+        if (! auth()->check()) {
+            $request->query->remove('scope');
+        }
+
         $semua = DummyData::events();
 
         return view('event.index', [
@@ -16,7 +21,7 @@ class EventController extends Controller
             'daftarKategori' => array_values(array_unique(array_column($semua, 'kategori'))),
         ]);
     }
-
+    
     public function show(int $id)
     {
         $event = collect(DummyData::events())->firstWhere('id', $id);

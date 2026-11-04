@@ -10,11 +10,25 @@ use App\Http\Controllers\PengaturanController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/kota', [KotaController::class, 'index'])->name('kota');
-Route::get('/kampus', [KampusController::class, 'index'])->name('kampus');
+Route::get('/kota', function (Request $request) {
+    if (! auth()->check()) {
+        return redirect()->route('register');
+    }
+
+    return app(KotaController::class)->index($request);
+})->name('kota');
+
+Route::get('/kampus', function (Request $request) {
+    if (! auth()->check()) {
+        return redirect()->route('register');
+    }
+
+    return app(KampusController::class)->index($request);
+})->name('kampus');
 Route::get('/event', [EventController::class, 'index'])->name('event');
 Route::view('/tentang', 'tentang')->name('tentang');
 Route::get('/cari', [SearchController::class, 'index'])->name('cari');

@@ -1,8 +1,8 @@
 @php
-    $jumlahNotifikasiBelumDibaca = collect(App\Support\DummyData::notifikasi())
-        ->where('dibaca', false)
-        ->count();
-
+    $jumlahNotifikasiBelumDibaca = auth()->check()
+        ? collect(App\Support\DummyData::notifikasi())->where('dibaca', false)->count()
+        : 0;
+        
     $menuSamping = [
         ['url' => url('/'),                                                   'aktif' => request()->is('/', 'kota*', 'kampus*'), 'ikon' => 'home',    'label' => 'Beranda'],
         ['url' => route('cari'),                                              'aktif' => request()->is('cari*'),                 'ikon' => 'search',  'label' => 'Pencarian'],

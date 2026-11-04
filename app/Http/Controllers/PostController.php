@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Support\DummyData;
+use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -205,25 +206,19 @@ class PostController extends Controller
 
         $baru = session('postingan_baru', []);
 
-        $baru[] = [
-            'id' => 1000 + count($baru) + 1,
-            'dibuat' => time(),
+        Post::create([
+            'user_id' => Auth::id(),
             'penulis' => Auth::user()->name,
             'kampus' => Auth::user()->kampus,
             'kota' => Auth::user()->kota,
-            'scope' => $data['scope'],
-            'waktu' => 'baru saja',
-            'konten' => $data['konten'],
             'prodi' => Auth::user()->prodi,
-            'suka' => 0,
-            'komentar' => 0,
+            'scope' => $data['scope'],
+            'konten' => $data['konten'],
             'foto' => $fotoPath,
             'video' => $videoPath,
             'lokasi' => $lokasiUrl,
             'lokasi_nama' => $lokasiNama,
-        ];
-
-        session(['postingan_baru' => $baru]);
+        ]);
 
         return redirect()->route('akun.index', ['tab' => 'postingan'])
             ->with('sukses', 'Postingan berhasil diterbitkan.');
@@ -300,18 +295,17 @@ class PostController extends Controller
         }
 
         $edits = session('postingan_edit', []);
-        $edits[$id] = [
+        Post::where('id', $id)->where('user_id', Auth::id())->update([
             'kampus' => Auth::user()->kampus,
             'kota' => Auth::user()->kota,
-            'scope' => $data['scope'],
             'prodi' => Auth::user()->prodi,
+            'scope' => $data['scope'],
             'konten' => $data['konten'],
             'foto' => $fotoPath,
             'video' => $videoPath,
             'lokasi' => $lokasiUrl,
             'lokasi_nama' => $lokasiNama,
-        ];
-        session(['postingan_edit' => $edits]);
+        ]);        session(['postingan_edit' => $edits]);
 
         return redirect()->route('akun.index', ['tab' => 'postingan'])
             ->with('sukses', 'Postingan berhasil diperbarui.');

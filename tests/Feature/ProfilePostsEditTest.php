@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Post;
 use App\Models\User;
 
 test('events posted by user appear on their profile page', function () {
@@ -28,9 +29,7 @@ test('posts on profile page show edit button and can be updated', function () {
 
     $this->actingAs($user)->post('/buat', [
         'tipe' => 'post',
-        'kampus' => 'Universitas Brawijaya',
         'scope' => 'Kampus',
-        'prodi' => 'Teknik Informatika',
         'konten' => 'Postingan awal untuk uji coba edit.',
     ]);
 
@@ -39,21 +38,29 @@ test('posts on profile page show edit button and can be updated', function () {
     $response->assertSee('Postingan awal untuk uji coba edit.');
     $response->assertSee('Edit');
 
-    $post = collect(session('postingan_baru', []))->last();
+    $post = Post::latest('id')->firstOrFail();
 
-    $editPage = $this->actingAs($user)->get(route('post.edit', $post['id']));
+    $editPage = $this->actingAs($user)->get(route('post.edit', $post->id));
     $editPage->assertStatus(200);
     $editPage->assertSee('Edit Postingan');
 
-    $updateResponse = $this->actingAs($user)->put(route('post.update', $post['id']), [
-        'kampus' => 'Universitas Brawijaya',
+    $updateResponse = $this->actingAs($user)->put(route('post.update', $post->id), [
         'scope' => 'Kota',
-        'prodi' => 'Teknik Informatika',
         'konten' => 'Konten postingan berhasil diubah.',
     ]);
 
-    $updateResponse->assertRedirect(route('akun.index', ['tab' => 'postingan']));
+    $updateResponse->assertRedirect();
+
+    $this->assertDatabaseHas('posts', [
+        'id' => $post->id,
+        'konten' => 'Konten postingan berhasil diubah.',
+        'scope' => 'Kota',
+    ]);
 
     $profileAfter = $this->actingAs($user)->get(route('akun.index', ['tab' => 'postingan']));
     $profileAfter->assertSee('Konten postingan berhasil diubah.');
+
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
 });

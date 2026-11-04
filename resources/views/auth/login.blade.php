@@ -15,10 +15,10 @@
 
         <div class="space-y-1.5">
             <x-input-label for="password" value="Kata sandi" />
-            <x-text-input id="password" type="password" name="password" required autocomplete="current-password" />
+            <x-password-input id="password" name="password" autocomplete="current-password" required />
             <x-input-error :messages="$errors->get('password')" />
         </div>
-
+        
         <div class="flex items-center justify-between pt-1">
             <label for="remember_me" class="inline-flex items-center gap-2">
                 <input id="remember_me" type="checkbox" name="remember" class="rounded border-neutral-300 text-neutral-900 focus:ring-neutral-900">

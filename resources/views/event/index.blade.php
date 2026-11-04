@@ -31,14 +31,16 @@
                 @endforeach
             </select>
 
-            <select name="scope"
-                class="min-w-0 flex-1 rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm text-neutral-900 focus:border-neutral-900 focus:ring-0">
-                <option value="">Kota & Kampus</option>
-                <option value="Kota" @selected(request('scope') === 'Kota')>Kota</option>
-                <option value="Kampus" @selected(request('scope') === 'Kampus')>Kampus</option>
-            </select>
+            @auth
+                <select name="scope"
+                    class="min-w-0 flex-1 rounded-full border border-neutral-300 bg-white px-4 py-2 text-sm text-neutral-900 focus:border-neutral-900 focus:ring-0">
+                    <option value="">Kota & Kampus</option>
+                    <option value="Kota" @selected(request('scope') === 'Kota')>Kota</option>
+                    <option value="Kampus" @selected(request('scope') === 'Kampus')>Kampus</option>
+                </select>
+            @endauth
         </div>
-
+        
         {{-- Aksi --}}
         <div class="flex gap-2">
             <button type="submit"
