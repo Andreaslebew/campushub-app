@@ -10,6 +10,8 @@ use App\Http\Controllers\PengaturanController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\LaporanController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -43,6 +45,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/buat', [PostController::class, 'create'])->name('post.create');
     Route::post('/buat', [PostController::class, 'store'])->name('post.store');
     Route::post('/post/{id}/suka', [PostController::class, 'suka'])->whereNumber('id')->name('post.suka');
+    Route::post('/post/{id}/lapor', [LaporanController::class, 'store'])->whereNumber('id')->name('post.lapor');
     Route::get('/akun', [AkunController::class, 'index'])->name('akun.index');
     Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan.index');
     Route::post('/event/{id}/suka', [EventController::class, 'suka'])->whereNumber('id')->name('event.suka');
@@ -62,6 +65,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::middleware(['auth', 'can:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/postingan', [AdminController::class, 'postingan'])->name('postingan');
+    Route::delete('/postingan/{id}', [AdminController::class, 'hapusPostingan'])->whereNumber('id')->name('postingan.destroy');
+    Route::get('/laporan', [AdminController::class, 'laporan'])->name('laporan');
+    Route::patch('/laporan/{id}', [AdminController::class, 'perbaruiLaporan'])->whereNumber('id')->name('laporan.update');
 });
 
 require __DIR__.'/auth.php';

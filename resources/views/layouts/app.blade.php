@@ -104,9 +104,14 @@
 
             <!-- Konten utama -->
             <main class="main-content desktop-content-area w-full max-w-2xl flex-1 px-4 py-5 pb-24">
+                @if (session('sukses'))
+                    <div class="mb-4 rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                        {{ session('sukses') }}
+                    </div>
+                @endif
                 @yield('content')
             </main>
-
+            
             {{-- Right spacer for symmetry on desktop --}}
             <div class="desktop-spacer"></div>
         </div>

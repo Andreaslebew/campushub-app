@@ -2,6 +2,7 @@
     $inisial = mb_strtoupper(mb_substr($post['penulis'] ?? 'U', 0, 1));
     $isKampus = in_array(strtolower($post['scope'] ?? ''), ['kampus']);
     $sudahSuka = in_array($post['id'], session('disukai', []), true);
+    $punyaSaya = auth()->check() && ($post['user_id'] ?? null) === auth()->id();
 @endphp
 
 <article id="post-{{ $post['id'] }}" class="scroll-mt-24 rounded-2xl border border-neutral-200 bg-white p-4 sm:p-5 transition hover:bg-neutral-50/60">
@@ -26,12 +27,51 @@
             @if ($bisaEdit ?? false)
                 <a href="{{ route('post.edit', $post['id']) }}"
                     class="inline-flex items-center gap-1 rounded-full border border-neutral-300 bg-white px-2.5 py-1 text-xs font-semibold text-neutral-700 transition hover:border-neutral-900 hover:bg-neutral-900 hover:text-white">
-                    <svg class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
-                    </svg>
                     <span>Edit</span>
                 </a>
             @endif
+
+            {{-- Hapus: hanya untuk admin --}}
+            @can('admin')
+                <form method="POST" action="{{ route('admin.postingan.destroy', $post['id']) }}"
+                    onsubmit="return confirm('Hapus postingan ini secara permanen?')">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                        class="rounded-full border border-rose-200 px-2.5 py-1 text-xs font-semibold text-rose-600 transition hover:bg-rose-600 hover:text-white">
+                        Hapus
+                    </button>
+                </form>
+            @endcan
+
+            {{-- Lapor: untuk user yang login, selain pada postingan sendiri --}}
+            @auth
+                @if (! $punyaSaya)
+                    <details class="relative">
+                        <summary class="list-none cursor-pointer rounded-full border border-neutral-300 px-2.5 py-1 text-xs font-semibold text-neutral-600 transition hover:border-rose-500 hover:text-rose-600">
+                            Lapor
+                        </summary>
+
+                        <form method="POST" action="{{ route('post.lapor', $post['id']) }}"
+                            class="absolute right-0 z-20 mt-2 w-64 space-y-2 rounded-xl border border-neutral-200 bg-white p-3 shadow-lg">
+                            @csrf
+                            <select name="alasan" required
+                                class="w-full rounded-lg border-neutral-300 text-xs focus:border-neutral-900 focus:ring-0">
+                                <option value="">Pilih alasan</option>
+                                @foreach (\App\Models\LaporanPost::ALASAN as $alasan)
+                                    <option value="{{ $alasan }}">{{ $alasan }}</option>
+                                @endforeach
+                            </select>
+                            <textarea name="keterangan" rows="2" maxlength="500" placeholder="Keterangan (opsional)"
+                                class="w-full rounded-lg border-neutral-300 text-xs placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-0"></textarea>
+                            <button type="submit"
+                                class="w-full rounded-lg bg-rose-600 py-1.5 text-xs font-semibold text-white hover:bg-rose-700">
+                                Kirim laporan
+                            </button>
+                        </form>
+                    </details>
+                @endif
+            @endauth
 
             <span class="rounded-full border px-3 py-0.5 text-xs font-semibold
                 {{ $isKampus ? 'border-neutral-900 text-neutral-900' : 'border-neutral-300 text-neutral-600' }}">

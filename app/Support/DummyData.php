@@ -117,6 +117,7 @@ class DummyData
             ->get()
             ->map(fn ($p) => [
                 'id' => $p->id,
+                'user_id' => $p->user_id,
                 'penulis' => $p->penulis,
                 'kampus' => $p->kampus,
                 'kota' => $p->kota,
@@ -134,7 +135,7 @@ class DummyData
             ])
             ->all();
     }
-    
+        
     public static function events(): array
     {
         $disukai = session('disukai_event', []);

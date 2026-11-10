@@ -3,13 +3,7 @@
 @section('content')
 <div class="space-y-5">
 
-    @if (session('sukses'))
-        <div class="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-            {{ session('sukses') }}
-        </div>
-    @endif
 
-    {{-- Kartu profil --}}
     {{-- Kartu profil --}}
     <div class="relative rounded-2xl border border-neutral-200 bg-white p-5 sm:p-6">
         {{-- Tombol pengaturan (pojok kanan atas) --}}

@@ -23,13 +23,6 @@
     {{-- Postingan utama --}}
     @include('komponen.kartu-post', ['post' => $post])
 
-    {{-- Notifikasi sukses --}}
-    @if (session('sukses'))
-        <div class="rounded-xl bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-            {{ session('sukses') }}
-        </div>
-    @endif
-
     {{-- Form balasan --}}
     <form method="POST" action="{{ route('post.komentar', $post['id']) }}" enctype="multipart/form-data"
         class="rounded-2xl border border-neutral-200 bg-white p-4">

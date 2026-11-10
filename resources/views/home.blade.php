@@ -62,17 +62,17 @@
 @endsection
 
 @section('content')
-<div class="space-y-3">
-    @forelse ($feed as $item)
-        @if ($item['tipe'] === 'event')
-            @include('komponen.kartu-event', ['event' => $item['data']])
-        @else
-            @include('komponen.kartu-post', ['post' => $item['data']])
-        @endif
-    @empty
-        <div class="rounded-2xl border border-dashed border-neutral-300 bg-white p-8 text-center text-sm text-neutral-500">
-            Belum ada postingan saat ini.
-        </div>
-    @endforelse
-</div>
+    <div class="space-y-3">
+        @forelse ($feed as $item)
+            @if ($item['tipe'] === 'event')
+                @include('komponen.kartu-event', ['event' => $item['data']])
+            @else
+                @include('komponen.kartu-post', ['post' => $item['data']])
+            @endif        
+        @empty
+            <div class="rounded-2xl border border-dashed border-neutral-300 bg-white p-8 text-center text-sm text-neutral-500">
+                Belum ada postingan saat ini.
+            </div>
+        @endforelse
+    </div>
 @endsection
