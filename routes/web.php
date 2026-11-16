@@ -12,6 +12,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\PenggunaController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -47,6 +48,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/post/{id}/suka', [PostController::class, 'suka'])->whereNumber('id')->name('post.suka');
     Route::post('/post/{id}/lapor', [LaporanController::class, 'store'])->whereNumber('id')->name('post.lapor');
     Route::get('/akun', [AkunController::class, 'index'])->name('akun.index');
+    Route::get('/pengguna/{id}', [PenggunaController::class, 'show'])->whereNumber('id')->name('pengguna.show');
     Route::get('/pengaturan', [PengaturanController::class, 'index'])->name('pengaturan.index');
     Route::post('/event/{id}/suka', [EventController::class, 'suka'])->whereNumber('id')->name('event.suka');
     Route::get('/post/{id}/edit', [PostController::class, 'edit'])->whereNumber('id')->name('post.edit');

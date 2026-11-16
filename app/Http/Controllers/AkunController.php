@@ -13,7 +13,7 @@ class AkunController extends Controller
         $user = Auth::user();
         $semuaPosts = DummyData::posts();
         $semuaEvents = DummyData::events();
-        $disukaiPosts = session('disukai', []);
+        $idPostDisukai = $user->postsDisukai()->pluck('posts.id')->all();
         $disukaiEvents = session('disukai_event', []);
 
         // Postingan saya (post biasa dan event yang diposting oleh user)
@@ -28,9 +28,9 @@ class AkunController extends Controller
         $postingan = array_merge($userPosts, $userEvents);
         usort($postingan, fn ($a, $b) => ($b['dibuat'] ?? 0) <=> ($a['dibuat'] ?? 0));
 
-        // Disukai list (posts dan events yang disukai)
+        // Disukai list (posts dari database, events masih dari session)
         $likedPosts = array_map(fn ($p) => ['tipe' => 'post', 'data' => $p, 'dibuat' => $p['dibuat'] ?? 0],
-            array_values(array_filter($semuaPosts, fn ($p) => in_array($p['id'], $disukaiPosts, true)))
+            array_values(array_filter($semuaPosts, fn ($p) => in_array($p['id'], $idPostDisukai, true)))
         );
 
         $likedEvents = array_map(fn ($e) => ['tipe' => 'event', 'data' => $e, 'dibuat' => $e['dibuat'] ?? 0],

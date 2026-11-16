@@ -13,7 +13,12 @@
     @endif
 
     <div class="rounded-xl bg-neutral-50 p-3">
-        <p class="text-xs font-semibold text-neutral-700">{{ $laporan->post->penulis }}</p>
+        <p class="text-xs font-semibold text-neutral-700">
+        @if ($laporan->post->user_id)
+            <a href="{{ route('pengguna.show', $laporan->post->user_id) }}" class="hover:underline">{{ $laporan->post->penulis }}</a>
+        @else
+            {{ $laporan->post->penulis }}
+        @endif</p>
         <p class="mt-1 whitespace-pre-line text-sm text-neutral-900">{{ $laporan->post->konten }}</p>
         <a href="{{ route('post.show', $laporan->post->id) }}" class="mt-2 inline-block text-xs text-neutral-600 hover:underline">
             Lihat postingan →

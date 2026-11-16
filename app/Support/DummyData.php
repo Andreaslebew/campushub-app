@@ -112,6 +112,10 @@ class DummyData
 
     public static function posts(): array
     {
+        $idDisukai = auth()->check()
+            ? auth()->user()->postsDisukai()->pluck('posts.id')->all()
+            : [];
+
         return \App\Models\Post::query()
             ->latest()
             ->get()
@@ -132,10 +136,11 @@ class DummyData
                 'komentar' => $p->komentar,
                 'waktu' => $p->created_at->diffForHumans(),
                 'dibuat' => $p->created_at->timestamp,
+                'disukai' => in_array($p->id, $idDisukai, true),
             ])
             ->all();
     }
-        
+    
     public static function events(): array
     {
         $disukai = session('disukai_event', []);

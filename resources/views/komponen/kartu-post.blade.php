@@ -1,8 +1,7 @@
 @php
     $inisial = mb_strtoupper(mb_substr($post['penulis'] ?? 'U', 0, 1));
     $isKampus = in_array(strtolower($post['scope'] ?? ''), ['kampus']);
-    $sudahSuka = in_array($post['id'], session('disukai', []), true);
-    $punyaSaya = auth()->check() && ($post['user_id'] ?? null) === auth()->id();
+    $sudahSuka = (bool) ($post['disukai'] ?? false);    $punyaSaya = auth()->check() && ($post['user_id'] ?? null) === auth()->id();
 @endphp
 
 <article id="post-{{ $post['id'] }}" class="scroll-mt-24 rounded-2xl border border-neutral-200 bg-white p-4 sm:p-5 transition hover:bg-neutral-50/60">
@@ -13,7 +12,13 @@
             </div>
 
             <div class="min-w-0">
-                <h6 class="truncate text-[15px] font-bold leading-tight text-neutral-900">{{ $post['penulis'] }}</h6>
+                <h6 class="truncate text-[15px] font-bold leading-tight text-neutral-900">
+                    @if (!empty($post['user_id']))
+                        <a href="{{ route('pengguna.show', $post['user_id']) }}" class="hover:underline">{{ $post['penulis'] }}</a>
+                    @else
+                        {{ $post['penulis'] }}
+                    @endif
+                </h6>
                 <p class="truncate text-sm text-neutral-500">
                     {{ $post['kampus'] }}
                     @if (!empty($post['waktu']))

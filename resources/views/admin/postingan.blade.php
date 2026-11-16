@@ -15,7 +15,11 @@
             <article class="flex items-start justify-between gap-3 rounded-2xl border border-neutral-200 bg-white p-4">
                 <div class="min-w-0">
                     <p class="text-sm font-bold text-neutral-900">
-                        {{ $post->penulis }}
+                        @if ($post->user_id)
+                            <a href="{{ route('pengguna.show', $post->user_id) }}" class="hover:underline">{{ $post->penulis }}</a>
+                        @else
+                            {{ $post->penulis }}
+                        @endif
                         <span class="font-normal text-neutral-500">· {{ $post->kampus ?? '-' }} · {{ $post->created_at->diffForHumans() }}</span>
                     </p>
                     <p class="mt-1 whitespace-pre-line text-sm text-neutral-800">{{ $post->konten }}</p>

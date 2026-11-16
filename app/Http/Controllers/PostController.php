@@ -226,19 +226,19 @@ class PostController extends Controller
 
     public function suka(int $id)
     {
-        abort_if(! collect(DummyData::posts())->firstWhere('id', $id), 404);
+        $post = Post::findOrFail($id);
 
-        $disukai = session('disukai', []);
+        $perubahan = Auth::user()->postsDisukai()->toggle($post->id);
 
-        $disukai = in_array($id, $disukai, true)
-            ? array_values(array_diff($disukai, [$id]))
-            : array_merge($disukai, [$id]);
-
-        session(['disukai' => $disukai]);
+        if (count($perubahan['attached']) > 0) {
+            $post->increment('suka');
+        } elseif ($post->suka > 0) {
+            $post->decrement('suka');
+        }
 
         return back();
     }
-
+    
     public function edit(int $id)
     {
         $post = collect(DummyData::posts())->firstWhere('id', $id);
