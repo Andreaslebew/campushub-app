@@ -19,6 +19,17 @@
         </button>
     </div>
 
+    @if ($errors->any())
+        <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs sm:text-sm text-rose-700">
+            <p class="font-semibold">Ada isian yang belum sesuai:</p>
+            <ul class="mt-1 list-disc pl-5">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form method="POST" action="{{ route('post.store') }}" enctype="multipart/form-data" class="space-y-4">
         @csrf
         <input type="hidden" id="input-tipe" name="tipe" value="{{ old('tipe', 'post') }}">
@@ -33,17 +44,20 @@
             <div class="space-y-1.5">
                 <label for="scope-post" class="block text-xs sm:text-sm font-semibold text-neutral-900">Forum</label>
                 <select id="scope-post" name="scope"
-                    class="block w-full rounded-xl border-neutral-300 px-4 py-2.5 text-xs sm:text-sm focus:border-neutral-900 focus:ring-0">
+                    class="block w-full rounded-xl border-neutral-300 px-4 py-2.5 text-xs sm:text-sm focus:border-neutral-900 focus:ring-0 @error('scope') is-invalid @enderror">
                     <option value="Kota" @selected(old('scope') === 'Kota')>Forum Kota</option>
                     <option value="Kampus" @selected(old('scope') === 'Kampus')>Forum Kampus</option>
                 </select>
+                @error('scope')
+                    <p class="text-xs text-rose-600">{{ $message }}</p>
+                @enderror
             </div>
 
             <div class="space-y-1.5">
                 <label for="konten" class="block text-xs sm:text-sm font-semibold text-neutral-900">Isi postingan</label>
                 <textarea id="konten" name="konten" rows="4" maxlength="500"
                     placeholder="Apa yang ingin kamu diskusikan atau tanyakan?"
-                    class="block w-full rounded-xl border-neutral-300 px-4 py-2.5 text-xs sm:text-sm placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-0">{{ old('konten') }}</textarea>
+                    class="block w-full rounded-xl border-neutral-300 px-4 py-2.5 text-xs sm:text-sm placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-0 @error('konten') is-invalid @enderror">{{ old('konten') }}</textarea>                
                 @error('konten')
                     <p class="text-xs text-rose-600">{{ $message }}</p>
                 @enderror

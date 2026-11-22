@@ -32,10 +32,10 @@
         @endif
 
         <label for="isi" class="text-sm font-semibold text-neutral-900">Tulis balasan</label>
-        <textarea id="isi" name="isi" rows="3" maxlength="500"
+        <textarea id="isi" name="isi" rows="3" maxlength="1000"
             placeholder="Bagikan pengalamanmu..."
-            class="mt-2 w-full rounded-xl border-neutral-300 text-sm placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-0">{{ old('isi') }}</textarea>
-
+            class="mt-2 w-full rounded-xl border-neutral-300 text-sm placeholder:text-neutral-400 focus:border-neutral-900 focus:ring-0 @error('isi') is-invalid @enderror">{{ old('isi') }}</textarea>
+        
         @error('isi')
             <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
         @enderror

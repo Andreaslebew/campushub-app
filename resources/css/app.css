@@ -412,3 +412,7 @@ body {
         font-size: 1.05rem !important;
     }
 }
+
+.is-invalid {
+    border-color: #e11d48 !important;
+}
