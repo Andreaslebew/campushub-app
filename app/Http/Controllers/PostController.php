@@ -33,7 +33,7 @@ class PostController extends Controller
             'isi.required' => 'Balasan tidak boleh kosong.',
             'isi.max' => 'Balasan maksimal 1000 karakter.',
         ]);
-        
+
         $fotoPath = null;
         if ($request->hasFile('foto')) {
             $file = $request->file('foto');
@@ -264,13 +264,19 @@ class PostController extends Controller
 
         $data = $request->validate([
             'scope' => 'required|in:Kota,Kampus',
-            'konten' => 'required|string|max:500',
+            'konten' => 'required|string|min:20|max:500',
             'foto' => 'nullable|file|mimes:jpg,jpeg,png,webp,gif|max:10240',
             'video' => 'nullable|file|mimetypes:video/mp4,video/webm,video/quicktime,video/x-matroska|max:51200',
             'lokasi' => 'nullable|string|max:500',
             'lokasi_nama' => 'nullable|string|max:255',
+        ], [
+            'scope.required' => 'Pilih forum tujuan topik Anda.',
+            'scope.in' => 'Pilih salah satu forum yang tersedia: Forum Kota atau Forum Kampus.',
+            'konten.required' => 'Isi topik tidak boleh kosong.',
+            'konten.min' => 'Isi topik minimal 20 karakter.',
+            'konten.max' => 'Isi topik maksimal 500 karakter.',
         ]);
-
+        
         $fotoPath = $post['foto'] ?? null;
         if ($request->hasFile('foto')) {
             $file = $request->file('foto');
